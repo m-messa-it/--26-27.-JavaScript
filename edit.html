@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редагування поштового відправлення — PostService</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 1. Заголовок сайту -->
+    <header class="site-header">
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <span class="logo-badge">PS</span>
+                <span>Поштовий сервіс PostService</span>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html">Список відправлень</a>
+                <a href="edit.html" class="active">Редагування відправлення</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Основна частина сторінки -->
+    <main class="main-content">
+        <div class="card">
+            <!-- 2. Назва сторінки -->
+            <div class="page-title-block">
+                <h1 class="page-title" id="pageTitleText">Редагування поштового відправлення</h1>
+                <span class="item-id-badge" id="shipmentBadge">Завантаження...</span>
+            </div>
+
+            <!-- Блок для повідомлення про статус збереження/помилку сервера -->
+            <div id="statusAlert" class="alert"></div>
+
+            <!-- 3. Форма для вводу даних -->
+            <form id="postingForm" novalidate>
+                <input type="hidden" id="postingId" name="id" value="0">
+
+                <!-- Секція: Маршрут та адресати -->
+                <div class="form-section">
+                    <h3 class="section-subtitle">📍 Адресати та маршрут доставки</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fromInput">Відправник (місто, адреса, ПІБ):<span class="required-star">*</span></label>
+                            <input type="text" id="fromInput" name="from" placeholder="Наприклад: м. Київ, вул. Хрещатик, 1">
+                            <span class="error-message" id="fromError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="toInput">Одержувач (місто, адреса, ПІБ):<span class="required-star">*</span></label>
+                            <input type="text" id="toInput" name="to" placeholder="Наприклад: м. Львів, вул. Городоцька, 20">
+                            <span class="error-message" id="toError"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Секція: Параметри відправлення -->
+                <div class="form-section">
+                    <h3 class="section-subtitle">📦 Параметри посилки</h3>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="contentInput">Опис вмісту відправлення:<span class="required-star">*</span></label>
+                            <input type="text" id="contentInput" name="content" placeholder="Наприклад: Документи, одяг, техніка">
+                            <span class="error-message" id="contentError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="deliveryTypeSelect">Тип доставки:<span class="required-star">*</span></label>
+                            <select id="deliveryTypeSelect" name="deliveryType">
+                                <option value="0">Standard (Стандартна доставка)</option>
+                                <option value="1">Courier (Кур'єрська доставка)</option>
+                                <option value="2">Express (Експрес-доставка)</option>
+                            </select>
+                            <span class="error-message" id="deliveryTypeError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="weightInput">Вага (кг):<span class="required-star">*</span></label>
+                            <input type="number" id="weightInput" name="weight" step="0.01" min="0.01" max="1000" placeholder="0.5">
+                            <span class="error-message" id="weightError"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Секція: Габарити -->
+                <div class="form-section">
+                    <h3 class="section-subtitle">📏 Габарити посилки (см)</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="widthInput">Ширина (см):<span class="required-star">*</span></label>
+                            <input type="number" id="widthInput" name="width" min="1" max="300" placeholder="20">
+                            <span class="error-message" id="widthError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="heightInput">Висота (см):<span class="required-star">*</span></label>
+                            <input type="number" id="heightInput" name="height" min="1" max="300" placeholder="15">
+                            <span class="error-message" id="heightError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="depthInput">Глибина / Довжина (см):<span class="required-star">*</span></label>
+                            <input type="number" id="depthInput" name="depth" min="1" max="300" placeholder="10">
+                            <span class="error-message" id="depthError"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Секція: Вартість -->
+                <div class="form-section">
+                    <h3 class="section-subtitle">💰 Вартість та оцінка</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="valueInput">Оголошена вартість (грн):<span class="required-star">*</span></label>
+                            <input type="number" id="valueInput" name="value" step="0.01" min="0" placeholder="500.00">
+                            <span class="error-message" id="valueError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="priceInput">Вартість доставки (грн):<span class="required-star">*</span></label>
+                            <input type="number" id="priceInput" name="price" step="0.01" min="0" placeholder="75.00">
+                            <span class="error-message" id="priceError"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Дві кнопки: Зберегти та Скасувати -->
+                <div class="form-actions">
+                    <button type="button" id="btnCancel" class="btn btn-secondary">
+                        ✕ Скасувати
+                    </button>
+                    <button type="button" id="btnSave" class="btn btn-primary">
+                        💾 Зберегти
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Футер -->
+    <footer class="site-footer">
+        <p>© 2026 PostService — Система управління поштовими відправленнями</p>
+    </footer>
+
+    <!-- Скрипт з обробниками change, input, click та валідацією -->
+    <script src="edit.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список поштових відправлень — PostService</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Шапка сайту -->
+    <header class="site-header">
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <span class="logo-badge">PS</span>
+                <span>Поштовий сервіс PostService</span>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="active">Список відправлень</a>
+                <a href="edit.html">Створити відправлення</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Основний контент -->
+    <main class="main-content">
+        <div class="card">
+            <div class="page-title-block">
+                <div>
+                    <h1 class="page-title">Список поштових відправлень</h1>
+                    <p class="field-hint">Управління реєстром посилок та відправлень у системі PostService</p>
+                </div>
+                <a href="edit.html" class="btn btn-primary">
+                    + Нове відправлення
+                </a>
+            </div>
+
+            <div id="tableAlert" class="alert"></div>
+
+            <!-- Таблиця відправлень -->
+            <div class="table-responsive">
+                <table class="postings-table">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Маршрут (Звідки ➔ Куди)</th>
+                            <th>Опис вмісту</th>
+                            <th>Тип доставки</th>
+                            <th>Вага (кг)</th>
+                            <th>Оголошена вартість</th>
+                            <th>Вартість доставки</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody id="postingsTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 2rem;">
+                                Завантаження списку відправлень...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Футер -->
+    <footer class="site-footer">
+        <p>© 2026 PostService — Система управління поштовими відправленнями</p>
+    </footer>
+
+    <!-- Скрипт завантаження списку відправлень -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const tableBody = document.getElementById('postingsTableBody');
+            const tableAlert = document.getElementById('tableAlert');
+
+            const API_BASE_URL = window.location.origin.includes('localhost') 
+                ? window.location.origin 
+                : 'http://localhost:5222';
+
+            const deliveryTypes = ['Standard', 'Courier', 'Express'];
+            const deliveryBadges = ['badge-standard', 'badge-courier', 'badge-express'];
+
+            // Дефолтні тестові дані (збігаються з PostingsController C#)
+            const defaultPostings = [
+                {
+                    id: 1,
+                    from: "Київ",
+                    to: "Львів",
+                    content: "Документи та книги",
+                    deliveryType: 1,
+                    weight: 1.5,
+                    width: 25,
+                    height: 15,
+                    depth: 20,
+                    value: 350.0,
+                    price: 85.0
+                },
+                {
+                    id: 2,
+                    from: "Рівне",
+                    to: "Луцьк",
+                    content: "Одяг та аксесуари",
+                    deliveryType: 0,
+                    weight: 2.0,
+                    width: 30,
+                    height: 20,
+                    depth: 10,
+                    value: 500.0,
+                    price: 90.0
+                }
+            ];
+
+            async function loadPostings() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/postings`);
+                    if (response.ok) {
+                        const items = await response.json();
+                        renderTable(items);
+                        return;
+                    }
+                } catch (e) {
+                    console.log('PostService сервер недоступний напряму, відображаємо стандартний список.');
+                }
+                renderTable(defaultPostings);
+            }
+
+            function renderTable(items) {
+                if (!items || items.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2rem;">Немає зареєстрованих відправлень</td></tr>';
+                    return;
+                }
+
+                tableBody.innerHTML = items.map(item => `
+                    <tr>
+                        <td><strong>#${item.id}</strong></td>
+                        <td>${escapeHtml(item.from)} ➔ ${escapeHtml(item.to)}</td>
+                        <td>${escapeHtml(item.content)}</td>
+                        <td>
+                            <span class="badge ${deliveryBadges[item.deliveryType] || 'badge-standard'}">
+                                ${deliveryTypes[item.deliveryType] || 'Standard'}
+                            </span>
+                        </td>
+                        <td>${item.weight} кг</td>
+                        <td>${item.value.toFixed(2)} грн</td>
+                        <td><strong>${item.price.toFixed(2)} грн</strong></td>
+                        <td>
+                            <a href="edit.html?id=${item.id}" class="btn btn-secondary btn-sm">
+                                ✏ Редагувати
+                            </a>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            }
+
+            loadPostings();
+        });
+    </script>
+</body>
+</html>
